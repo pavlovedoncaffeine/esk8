@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Esk8Throttle</string>
+    <string name="ledON">LED ON</string>
+    <string name="ledOFF">LED OFF</string>
+</resources>
