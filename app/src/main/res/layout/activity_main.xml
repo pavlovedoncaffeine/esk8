@@ -28,6 +28,7 @@
         android:layout_marginBottom="168dp"
         android:backgroundTint="@android:color/holo_blue_bright"
         android:fontFamily="sans-serif-condensed"
+        android:onClick="sendOffMsg"
         android:text="@string/ledOFF"
         android:textAlignment="center"
         android:textColor="@android:color/background_dark"
@@ -37,24 +38,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/menu_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorAccent"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <Button
         android:id="@+id/ledON"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="167dp"
         android:layout_height="97dp"
         android:layout_marginStart="15dp"
-        android:layout_marginTop="112dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="15dp"
         android:fontFamily="sans-serif-condensed"
+        android:onClick="sendOnMsg"
         android:text="@string/ledON"
         android:textAlignment="center"
         android:textColor="@android:color/background_dark"
@@ -62,7 +55,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/menu_toolbar" />
+        app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
@@ -70,5 +63,47 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_begin="122dp" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="151dp" />
+
+    <TextView
+        android:id="@+id/btStatusView"
+        android:layout_width="wrap_content"
+        android:layout_height="26dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/bt_status"
+        android:textColor="@color/colorPrimary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ledOFF"
+        app:layout_constraintVertical_bias="0.77" />
+
+    <TextView
+        android:id="@+id/readBuffer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/read_buffer"
+        android:textColor="@color/colorPrimary"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/ledOFF"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/divider"
+        app:layout_constraintTop_toBottomOf="@+id/ledON"
+        app:layout_constraintVertical_bias="0.07999998" />
 
 </android.support.constraint.ConstraintLayout>

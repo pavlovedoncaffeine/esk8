@@ -2,4 +2,6 @@
     <string name="app_name">Esk8Throttle</string>
     <string name="ledON">LED ON</string>
     <string name="ledOFF">LED OFF</string>
+    <string name="bt_status">Bluetooth Status</string>
+    <string name="read_buffer">PT: Read Buffer</string>
 </resources>
