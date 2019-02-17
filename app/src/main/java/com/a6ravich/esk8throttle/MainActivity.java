@@ -7,9 +7,10 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+//import android.util.Log;
 import android.view.*;
 import android.bluetooth.*;
+//import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,17 +24,20 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static Handler mHandler;
-
     private static final String TAG = "MainActivity";
 
+    // Global variables
+    public static Handler mHandler;
+
+    private ConnectedThread mConnectedThread; // bluetooth background worker thread to send and receive data
     BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
     BluetoothDevice esk8 = null;
-    Set<BluetoothDevice> pairedDev;
     BluetoothSocket btsocket;
-    private ConnectedThread mConnectedThread; // bluetooth background worker thread to send and receive data
-    private String btStatus = null;
 
+    private String btStatus = null;
+    Set<BluetoothDevice> pairedDev;
+
+    // Layout views
     private Button LEDon;
     private Button LEDoff;
     private TextView mBTStatus;
@@ -42,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     //You can use a random UUID generator from the internet, or use the UUID.randomUUID() method
     //private final static UUID uuid = UUID.fromString("350320f0-b302-4f69-b827-53f3a203c3b2");
 
+    //Request codes
     public static final int ENABLE_BT_REQUEST_CODE = 1337;
     public final static int MESSAGE_READ = 2; // used in bluetooth handler to identify message update
     public final static int CONNECTING_STATUS = 3; // used in bluetooth handler to identify message status
@@ -52,16 +57,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        LEDon = (Button) findViewById(R.id.ledON);
-        LEDoff = (Button) findViewById(R.id.ledOFF);
-        mBTStatus = (TextView) findViewById(R.id.btStatusView);
-        mReadBuffer = (TextView) findViewById(R.id.readBuffer);
+        LEDon = findViewById(R.id.ledON);
+        LEDoff = findViewById(R.id.ledOFF);
+        mBTStatus = findViewById(R.id.btStatusView);
+        mReadBuffer = findViewById(R.id.readBuffer);
 
 
         LEDon.setClickable(true);
         LEDoff.setClickable(true);
         mBTStatus.setClickable(false);
-
+        mReadBuffer.setClickable(false);
 
         //checking if bluetooth exists on device
         if (btAdapter == null) {
@@ -74,6 +79,29 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Enabling Bluetooth", Toast.LENGTH_SHORT).show();
             }
         }
+
+        Boolean foundDevice = false;
+        if (btAdapter.getState() == BluetoothAdapter.STATE_ON) {
+            pairedDev = btAdapter.getBondedDevices();
+            for (BluetoothDevice dev : pairedDev) {
+                if (dev.getName().equalsIgnoreCase("HC-06")) {
+                    esk8 = dev;
+                    foundDevice = true;
+                    break;
+                }
+            }
+            if (!foundDevice) {
+                Toast.makeText(getApplicationContext(),
+                        "Pair with HC-06 using device's Bluetooth settings",
+                        Toast.LENGTH_LONG).show();
+
+                //Open BT settings for device if esk8 HC-06 is not paired with device
+                Intent intentBluetooth = new Intent();
+                intentBluetooth.setAction(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
+                startActivity(intentBluetooth);
+            }
+        }
+
 
         mHandler = new Handler(Looper.getMainLooper()) {
             public void handleMessage(android.os.Message msg) {
@@ -94,6 +122,40 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+
+        new Thread() {
+            public void run() {
+                boolean fail = false;
+
+                //BluetoothDevice device = btAdapter.getRemoteDevice(address);
+                btsocket = createBluetoothSocket(esk8);
+                if (btsocket == null) {
+                    fail = true;
+                    Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
+                }
+                // Establish the Bluetooth socket connection.
+                try {
+                    btsocket.connect();
+                } catch (IOException e) {
+                    try {
+                        fail = true;
+                        btsocket.close();
+                        mHandler.obtainMessage(CONNECTING_STATUS, -1, -1)
+                                .sendToTarget();
+                    } catch (IOException e2) {
+                        //insert code to deal with this
+                        Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                if(!fail) {
+                    mConnectedThread = new ConnectedThread(btsocket);
+                    mConnectedThread.start();
+
+                    mHandler.obtainMessage(CONNECTING_STATUS, 1, -1, esk8.getName())
+                            .sendToTarget();
+                }
+            }
+        }.start();
     }
 
     @Override
@@ -107,18 +169,6 @@ public class MainActivity extends AppCompatActivity {
                 //...then display the following toast.//
                 Toast.makeText(getApplicationContext(), "Bluetooth has been enabled",
                         Toast.LENGTH_SHORT).show();
-                if (btAdapter.getState() == BluetoothAdapter.STATE_ON)
-                    pairedDev = btAdapter.getBondedDevices();
-                else {
-                    //boolean once = true;
-                    if (pairedToEsk8()) {
-                        //Connect as client to BT
-
-                        //Then
-                        //Go do ConnectedThread work
-                    }
-                }
-
             }
 
             //If the request was unsuccessful...//
@@ -129,49 +179,73 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public boolean pairedToEsk8() {
-        if (pairedDev.size() <= 0) {
-            return false;
-            //EXIT APPLICATION? TOAST- "Could not find e-Skateboard"
-        } else {
-            for (BluetoothDevice device : pairedDev) {
-                if (device.getName().equalsIgnoreCase("HC-06")) { //Change esk8 adapter name here
-                    esk8 = device;
-                    return true;
-                }
-            }
-            if (esk8 == null) {
-                Toast.makeText(getApplicationContext(),
-                        "Pair with HC-06 using device's Bluetooth settings",
-                        Toast.LENGTH_LONG).show();
-
-                //Open BT settings for device if esk8 HC-06 is not paired with device
-                Intent intentBluetooth = new Intent();
-                intentBluetooth.setAction(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
-                startActivity(intentBluetooth);
-                return false;
-            }
-        }
-        return false;
-
-    }
+//    public boolean pairedToEsk8() {
+//        if (pairedDev.size() <= 0) {
+//            return false;
+//            //EXIT APPLICATION? TOAST- "Could not find e-Skateboard"
+//        } else {
+//            for (BluetoothDevice device : pairedDev) {
+//                if (device.getName().equalsIgnoreCase("HC-06")) { //Change esk8 adapter name here
+//                    esk8 = device;
+//                    return true;
+//                }
+//            }
+//            if (esk8 == null) {
+//                Toast.makeText(getApplicationContext(),
+//                        "Pair with HC-06 using device's Bluetooth settings",
+//                        Toast.LENGTH_LONG).show();
+//
+//                //Open BT settings for device if esk8 HC-06 is not paired with device
+//                Intent intentBluetooth = new Intent();
+//                intentBluetooth.setAction(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
+//                startActivity(intentBluetooth);
+//                return false;
+//            }
+//        }
+//        return false;
+//
+//    }
 
     public void sendOnMsg(View view) {
         Toast.makeText(getApplicationContext(), "On LED ON clicked", Toast.LENGTH_SHORT).show();
         //write to connected thread
-
+        mConnectedThread.write("1");
     }
 
     public void sendOffMsg(View view) {
         Toast.makeText(getApplicationContext(), "On LED OFF clicked", Toast.LENGTH_SHORT).show();
         //write to connected thread
+        mConnectedThread.write("0");
 
     }
 
+//    private AdapterView.OnItemClickListener mDeviceClickListener = new AdapterView.OnItemClickListener() {
+//        public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+//
+//            if(!btAdapter.isEnabled()) {
+//                Toast.makeText(getBaseContext(), "Bluetooth not on", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//
+//
+//            // Get the device MAC address, which is the last 17 chars in the View
+//            String info = ((TextView) v).getText().toString();
+//            final String address = info.substring(info.length() - 17);
+//            final String name = info.substring(0,info.length() - 17);
+//
+//            // Spawn a new thread to avoid blocking the GUI one
+//
+//        }
+//    };
 
-    private BluetoothSocket createBluetoothSocket(@org.jetbrains.annotations.NotNull BluetoothDevice device) throws IOException {
-        return device.createRfcommSocketToServiceRecord(UUID.randomUUID());
-        //creates secure outgoing connection with BT device using a randomly generated UUID
+    private BluetoothSocket createBluetoothSocket(BluetoothDevice device) {
+        try {
+            return device.createRfcommSocketToServiceRecord(UUID.randomUUID());
+            //creates secure outgoing connection with BT device using a randomly generated UUID
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private class ConnectedThread extends Thread {
@@ -182,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
         private static final String TAG2 = "ConnectedThread";
 
 
-        public ConnectedThread(BluetoothSocket socket) {
+        private ConnectedThread(BluetoothSocket socket) {
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
