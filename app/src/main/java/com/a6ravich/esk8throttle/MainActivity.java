@@ -7,10 +7,8 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-//import android.util.Log;
 import android.view.*;
 import android.bluetooth.*;
-//import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -179,33 +177,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    public boolean pairedToEsk8() {
-//        if (pairedDev.size() <= 0) {
-//            return false;
-//            //EXIT APPLICATION? TOAST- "Could not find e-Skateboard"
-//        } else {
-//            for (BluetoothDevice device : pairedDev) {
-//                if (device.getName().equalsIgnoreCase("HC-06")) { //Change esk8 adapter name here
-//                    esk8 = device;
-//                    return true;
-//                }
-//            }
-//            if (esk8 == null) {
-//                Toast.makeText(getApplicationContext(),
-//                        "Pair with HC-06 using device's Bluetooth settings",
-//                        Toast.LENGTH_LONG).show();
-//
-//                //Open BT settings for device if esk8 HC-06 is not paired with device
-//                Intent intentBluetooth = new Intent();
-//                intentBluetooth.setAction(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
-//                startActivity(intentBluetooth);
-//                return false;
-//            }
-//        }
-//        return false;
-//
-//    }
-
     public void sendOnMsg(View view) {
         Toast.makeText(getApplicationContext(), "On LED ON clicked", Toast.LENGTH_SHORT).show();
         //write to connected thread
@@ -219,28 +190,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-//    private AdapterView.OnItemClickListener mDeviceClickListener = new AdapterView.OnItemClickListener() {
-//        public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
-//
-//            if(!btAdapter.isEnabled()) {
-//                Toast.makeText(getBaseContext(), "Bluetooth not on", Toast.LENGTH_SHORT).show();
-//                return;
-//            }
-//
-//
-//            // Get the device MAC address, which is the last 17 chars in the View
-//            String info = ((TextView) v).getText().toString();
-//            final String address = info.substring(info.length() - 17);
-//            final String name = info.substring(0,info.length() - 17);
-//
-//            // Spawn a new thread to avoid blocking the GUI one
-//
-//        }
-//    };
-
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) {
+        UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
         try {
-            return device.createRfcommSocketToServiceRecord(UUID.randomUUID());
+            return device.createInsecureRfcommSocketToServiceRecord(MY_UUID);
             //creates secure outgoing connection with BT device using a randomly generated UUID
         } catch (IOException e) {
             e.printStackTrace();
