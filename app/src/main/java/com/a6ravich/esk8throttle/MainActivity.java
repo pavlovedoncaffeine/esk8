@@ -2,14 +2,18 @@ package com.a6ravich.esk8throttle;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.*;
 import android.bluetooth.*;
+import android.widget.AbsSeekBar;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,8 +40,9 @@ public class MainActivity extends AppCompatActivity {
     Set<BluetoothDevice> pairedDev;
 
     // Layout views
-    private Button LEDon;
-    private Button LEDoff;
+    //private Button LEDon;
+    //private Button LEDoff;
+    private SeekBar mThrottle;
     private TextView mBTStatus;
     private TextView mReadBuffer;
 
@@ -50,19 +55,42 @@ public class MainActivity extends AppCompatActivity {
     public final static int CONNECTING_STATUS = 3; // used in bluetooth handler to identify message status
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        LEDon = findViewById(R.id.ledON);
-        LEDoff = findViewById(R.id.ledOFF);
+        //LEDon = findViewById(R.id.ledON);
+        //LEDoff = findViewById(R.id.ledOFF);
+        mThrottle = findViewById(R.id.throttleBar);
+        mThrottle.setProgress(0);
         mBTStatus = findViewById(R.id.btStatusView);
         mReadBuffer = findViewById(R.id.readBuffer);
 
 
-        LEDon.setClickable(true);
-        LEDoff.setClickable(true);
+        //LEDon.setClickable(true);
+        //LEDoff.setClickable(true);
+        mThrottle.setMax(9);
+        mThrottle.setMin(0);
+        mThrottle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int progress = 0;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progressVal, boolean fromUser) {
+                progress = progressVal;
+                mConnectedThread.write( String.valueOf(progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
         mBTStatus.setClickable(false);
         mReadBuffer.setClickable(false);
 
@@ -177,18 +205,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void sendOnMsg(View view) {
-        Toast.makeText(getApplicationContext(), "On LED ON clicked", Toast.LENGTH_SHORT).show();
-        //write to connected thread
-        mConnectedThread.write("1");
-    }
-
-    public void sendOffMsg(View view) {
-        Toast.makeText(getApplicationContext(), "On LED OFF clicked", Toast.LENGTH_SHORT).show();
-        //write to connected thread
-        mConnectedThread.write("0");
-
-    }
+//    public void sendOnMsg(View view) {
+//        Toast.makeText(getApplicationContext(), "On LED ON clicked", Toast.LENGTH_SHORT).show();
+//        //write to connected thread
+//        mConnectedThread.write("1");
+//    }
+//
+//    public void sendOffMsg(View view) {
+//        Toast.makeText(getApplicationContext(), "On LED OFF clicked", Toast.LENGTH_SHORT).show();
+//        //write to connected thread
+//        mConnectedThread.write("0");
+//
+//    }
 
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) {
         UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");

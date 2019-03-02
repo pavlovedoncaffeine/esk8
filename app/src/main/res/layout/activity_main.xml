@@ -8,55 +8,6 @@
     android:backgroundTint="@android:color/black"
     tools:context=".MainActivity">
 
-    <View
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="?android:attr/listDivider"
-        app:layout_constraintBottom_toTopOf="@+id/ledOFF"
-        app:layout_constraintTop_toBottomOf="@+id/ledON" />
-
-    <Button
-        android:id="@+id/ledOFF"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="167dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="168dp"
-        android:backgroundTint="@android:color/holo_blue_bright"
-        android:fontFamily="sans-serif-condensed"
-        android:onClick="sendOffMsg"
-        android:text="@string/ledOFF"
-        android:textAlignment="center"
-        android:textColor="@android:color/background_dark"
-        android:textSize="36sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/ledON"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="167dp"
-        android:layout_height="97dp"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="15dp"
-        android:fontFamily="sans-serif-condensed"
-        android:onClick="sendOnMsg"
-        android:text="@string/ledON"
-        android:textAlignment="center"
-        android:textColor="@android:color/background_dark"
-        android:textSize="36sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline2" />
-
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
         android:layout_width="wrap_content"
@@ -71,12 +22,25 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="151dp" />
 
+    <SeekBar
+        android:id="@+id/throttleBar"
+        style="@style/Widget.AppCompat.SeekBar.Discrete"
+        android:layout_width="350dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:max="9"
+        android:progress="3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline2" />
+
     <TextView
         android:id="@+id/btStatusView"
         android:layout_width="wrap_content"
         android:layout_height="26dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="16dp"
         android:text="@string/bt_status"
@@ -85,25 +49,20 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ledOFF"
-        app:layout_constraintVertical_bias="0.77" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/readBuffer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="20dp"
         android:text="@string/read_buffer"
         android:textColor="@color/colorPrimary"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/ledOFF"
+        app:layout_constraintBottom_toTopOf="@+id/btStatusView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/divider"
-        app:layout_constraintTop_toBottomOf="@+id/ledON"
-        app:layout_constraintVertical_bias="0.07999998" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
