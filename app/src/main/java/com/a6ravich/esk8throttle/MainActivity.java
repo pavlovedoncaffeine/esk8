@@ -1,7 +1,12 @@
 package com.a6ravich.esk8throttle;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,6 +15,8 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.bluetooth.*;
+import android.view.KeyEvent;
+import android.view.WindowManager;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,25 +56,34 @@ public class MainActivity extends AppCompatActivity {
     public final static int MESSAGE_READ = 2; // used in bluetooth handler to identify message update
     public final static int CONNECTING_STATUS = 3; // used in bluetooth handler to identify message status
 
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         mThrottle = findViewById(R.id.throttleBar);
-        mThrottle.setProgress(0);
+        mThrottle.setProgress(2);
         mBTStatus = findViewById(R.id.btStatusView);
         mReadBuffer = findViewById(R.id.readBuffer);
 
-        mThrottle.setMax(9);
+        final ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+        final Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+
+        mThrottle.setMax(5);
         mThrottle.setMin(0);
         mThrottle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             int progress = 0;
             @Override
             public void onProgressChanged(SeekBar seekBar, int progressVal, boolean fromUser) {
                 progress = progressVal;
+                if (progress == 2) {
+                    toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
+                    vib.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+                }
                 mConnectedThread.write( String.valueOf(progress));
             }
 
@@ -175,6 +191,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
+            int prog = mThrottle.getProgress();
+            if (prog > 0 && prog < 6) {
+                mThrottle.setProgress(prog-1, true);
+            }  else if (prog == 0) {
+                mThrottle.setProgress(0);
+            }
+            return true;
+        }
+
+        else if ((keyCode == KeyEvent.KEYCODE_VOLUME_UP)) {
+            int prog = mThrottle.getProgress();
+            if (prog >= 0 && prog < 5) {
+                mThrottle.setProgress(prog+1, true);
+            }  else if (prog >= 5) {
+                mThrottle.setProgress(5);
+            }
+            return true;
+        }
+        else {
+            return super.onKeyDown(keyCode, event);
+        }
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         //Check what request we’re responding to//
@@ -194,19 +236,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-//    public void sendOnMsg(View view) {
-//        Toast.makeText(getApplicationContext(), "On LED ON clicked", Toast.LENGTH_SHORT).show();
-//        //write to connected thread
-//        mConnectedThread.write("1");
-//    }
-//
-//    public void sendOffMsg(View view) {
-//        Toast.makeText(getApplicationContext(), "On LED OFF clicked", Toast.LENGTH_SHORT).show();
-//        //write to connected thread
-//        mConnectedThread.write("0");
-//
-//    }
 
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) {
         UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
