@@ -9,10 +9,7 @@ import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.*;
 import android.bluetooth.*;
-import android.widget.AbsSeekBar;
-import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,8 +37,6 @@ public class MainActivity extends AppCompatActivity {
     Set<BluetoothDevice> pairedDev;
 
     // Layout views
-    //private Button LEDon;
-    //private Button LEDoff;
     private SeekBar mThrottle;
     private TextView mBTStatus;
     private TextView mReadBuffer;
@@ -61,16 +56,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //LEDon = findViewById(R.id.ledON);
-        //LEDoff = findViewById(R.id.ledOFF);
         mThrottle = findViewById(R.id.throttleBar);
         mThrottle.setProgress(0);
         mBTStatus = findViewById(R.id.btStatusView);
         mReadBuffer = findViewById(R.id.readBuffer);
 
-
-        //LEDon.setClickable(true);
-        //LEDoff.setClickable(true);
         mThrottle.setMax(9);
         mThrottle.setMin(0);
         mThrottle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
